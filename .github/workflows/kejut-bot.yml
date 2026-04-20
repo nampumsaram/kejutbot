@@ -1,0 +1,16 @@
+name: Jam Loceng Hugging Face
+
+on:
+  schedule:
+    # Jalan setiap 12 jam (Pukul 12 pagi & 12 tengah hari waktu UTC)
+    - cron: '0 */12 * * *'
+  workflow_dispatch: # Supaya kau boleh tekan butang manual untuk test
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ketuk Pintu Hugging Face
+        run: |
+          # Ganti URL kat bawah ni dengan URL Direct Space kau
+          curl -I https://pikeuli-weather-bot.hf.space
