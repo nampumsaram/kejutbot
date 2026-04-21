@@ -1,38 +1,40 @@
-name: Jam Loceng Hugging Face (Multi-Bot)
+name: Jam Loceng Hugging Face (Full Squad)
 
 on:
   schedule:
     # Jalan setiap 6 jam
     - cron: '0 */6 * * *'
-  workflow_dispatch: # Butang manual untuk test
+  workflow_dispatch: 
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Kejutkan Semua Space
+      - name: Bangunkan Semua Bot
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 1. BOT CUACA (Public)
-          URL_WEATHER="https://pikeuli-weather-bot.hf.space"
-          echo "Sedang mengejutkan Bot Cuaca: $URL_WEATHER"
-          RES_WEATHER=$(curl -s -o /dev/null -w "%{http_code}" "$URL_WEATHER")
-          echo "Status Bot Cuaca: $RES_WEATHER"
+          # Senarai URL Bot Kau
+          # Nota: Nama Space dalam URL mesti huruf kecil
+          BOTS=(
+            "https://pikeuli-weather-bot.hf.space"
+            "https://pikeuli-berita-bot.hf.space"
+            "https://pikeuli-waktu-solat.hf.space"
+            "https://pikeuli-tengok-bulan.hf.space"
+          )
 
+          for URL in "${BOTS[@]}"; do
+            echo "------------------------------------------"
+            echo "Sedang mengejutkan: $URL"
+            
+            # Kita hantar Token untuk semua. Public bot tak kisah, Private bot wajib ada.
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $HF_TOKEN" "$URL")
+            
+            if [ "$STATUS" -eq 200 ] || [ "$STATUS" -eq 302 ]; then
+              echo "✅ BERJAYA: Bot aktif (Status $STATUS)"
+            else
+              echo "⚠️ AMARAN: Bot bermasalah atau masih tidur (Status $STATUS)"
+            fi
+          done
           echo "------------------------------------------"
-
-          # 2. BOT SOLAT (Private - Guna Token)
-          URL_SOLAT="https://pikeuli-waktu-solat.hf.space"
-          echo "Sedang mengejutkan Bot Solat (Private): $URL_SOLAT"
-          RES_SOLAT=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $HF_TOKEN" "$URL_SOLAT")
-          echo "Status Bot Solat: $RES_SOLAT"
-
-          echo "------------------------------------------"
-
-          # RUMUSAN HASIL
-          if [ "$RES_WEATHER" -eq 200 ] && [ "$RES_SOLAT" -eq 200 ]; then
-            echo "✅ SEMUA BOT DAH BANGUN!"
-          else
-            echo "⚠️ ADA BOT YANG MASIH TIDUR. Sila semak log di atas."
-          fi
+          echo "Semua bot telah diproses!"
