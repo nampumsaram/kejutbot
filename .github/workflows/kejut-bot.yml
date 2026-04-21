@@ -2,9 +2,10 @@ name: Jam Loceng Hugging Face
 
 on:
   schedule:
-    # Jalan setiap 12 jam (Pukul 12 pagi & 12 tengah hari waktu UTC)
-    - cron: '0 */12 * * *'
-  workflow_dispatch: # Supaya kau boleh tekan butang manual untuk test
+    # Jalan setiap 6 jam (Pukul 12 pagi, 6 pagi, 12 tengah hari, 6 petang UTC)
+    # GitHub Schedule memang ada delay 15-45 minit, itu normal.
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Butang manual tetap ada untuk test
 
 jobs:
   ping:
@@ -12,5 +13,17 @@ jobs:
     steps:
       - name: Ketuk Pintu Hugging Face
         run: |
-          # Ganti URL kat bawah ni dengan URL Direct Space kau
-          curl -I https://pikeuli-weather-bot.hf.space
+          URL="https://pikeuli-weather-bot.hf.space"
+          echo "Sedang mengejutkan Space: $URL"
+          
+          # Guna curl untuk dapatkan HTTP Status Code
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          
+          echo "Status diterima: $RESPONSE"
+          
+          if [ "$RESPONSE" -eq 200 ] || [ "$RESPONSE" -eq 301 ] || [ "$RESPONSE" -eq 302 ]; then
+            echo "✅ SUCCESS: Space sudah bangun dan aktif!"
+          else
+            echo "⚠️ WARNING: Space mungkin masih tidur atau URL salah. Status: $RESPONSE"
+            # Optional: exit 1 kalau nak bagi Actions tu tunjuk merah bila gagal
+          fi
