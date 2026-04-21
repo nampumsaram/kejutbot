@@ -1,29 +1,38 @@
-name: Jam Loceng Hugging Face
+name: Jam Loceng Hugging Face (Multi-Bot)
 
 on:
   schedule:
-    # Jalan setiap 6 jam (Pukul 12 pagi, 6 pagi, 12 tengah hari, 6 petang UTC)
-    # GitHub Schedule memang ada delay 15-45 minit, itu normal.
+    # Jalan setiap 6 jam
     - cron: '0 */6 * * *'
-  workflow_dispatch: # Butang manual tetap ada untuk test
+  workflow_dispatch: # Butang manual untuk test
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ketuk Pintu Hugging Face
+      - name: Kejutkan Semua Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          URL="https://pikeuli-weather-bot.hf.space"
-          echo "Sedang mengejutkan Space: $URL"
-          
-          # Guna curl untuk dapatkan HTTP Status Code
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
-          
-          echo "Status diterima: $RESPONSE"
-          
-          if [ "$RESPONSE" -eq 200 ] || [ "$RESPONSE" -eq 301 ] || [ "$RESPONSE" -eq 302 ]; then
-            echo "✅ SUCCESS: Space sudah bangun dan aktif!"
+          # 1. BOT CUACA (Public)
+          URL_WEATHER="https://pikeuli-weather-bot.hf.space"
+          echo "Sedang mengejutkan Bot Cuaca: $URL_WEATHER"
+          RES_WEATHER=$(curl -s -o /dev/null -w "%{http_code}" "$URL_WEATHER")
+          echo "Status Bot Cuaca: $RES_WEATHER"
+
+          echo "------------------------------------------"
+
+          # 2. BOT SOLAT (Private - Guna Token)
+          URL_SOLAT="https://pikeuli-waktu-solat.hf.space"
+          echo "Sedang mengejutkan Bot Solat (Private): $URL_SOLAT"
+          RES_SOLAT=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $HF_TOKEN" "$URL_SOLAT")
+          echo "Status Bot Solat: $RES_SOLAT"
+
+          echo "------------------------------------------"
+
+          # RUMUSAN HASIL
+          if [ "$RES_WEATHER" -eq 200 ] && [ "$RES_SOLAT" -eq 200 ]; then
+            echo "✅ SEMUA BOT DAH BANGUN!"
           else
-            echo "⚠️ WARNING: Space mungkin masih tidur atau URL salah. Status: $RESPONSE"
-            # Optional: exit 1 kalau nak bagi Actions tu tunjuk merah bila gagal
+            echo "⚠️ ADA BOT YANG MASIH TIDUR. Sila semak log di atas."
           fi
