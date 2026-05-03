@@ -2,8 +2,8 @@ name: Jam Loceng Hugging Face (Full Squad)
 
 on:
   schedule:
-    # Jalan setiap 6 jam
-    - cron: '0 */6 * * *'
+    # Jalan setiap 1 jam (Lebih selamat untuk logik Python)
+    - cron: '0 * * * *'
   workflow_dispatch: 
 
 jobs:
@@ -14,8 +14,6 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Senarai URL Bot Kau
-          # Nota: Nama Space dalam URL mesti huruf kecil
           BOTS=(
             "https://pikeuli-weather-bot.hf.space"
             "https://pikeuli-berita-bot.hf.space"
@@ -25,16 +23,26 @@ jobs:
 
           for URL in "${BOTS[@]}"; do
             echo "------------------------------------------"
-            echo "Sedang mengejutkan: $URL"
+            echo "⏰ Mengejutkan: $URL"
             
-            # Kita hantar Token untuk semua. Public bot tak kisah, Private bot wajib ada.
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $HF_TOKEN" "$URL")
+            # -L : Ikut redirect kalau HF tukar URL
+            # -s : Silent mode
+            # -i : Include headers (untuk debug status)
+            # --max-time : Jangan tunggu lama sangat kalau bot hang
+            STATUS=$(curl -L -s -o /dev/null -w "%{http_code}" \
+              -H "Authorization: Bearer $HF_TOKEN" \
+              --max-time 30 \
+              "$URL")
             
-            if [ "$STATUS" -eq 200 ] || [ "$STATUS" -eq 302 ]; then
-              echo "✅ BERJAYA: Bot aktif (Status $STATUS)"
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✅ BERJAYA: Bot segar bugar (Status $STATUS)"
+            elif [ "$STATUS" -eq 302 ] || [ "$STATUS" -eq 301 ]; then
+              echo "ℹ️ INFO: Bot redirect (Status $STATUS) - Masih OK"
+            elif [ "$STATUS" -eq 401 ] || [ "$STATUS" -eq 403 ]; then
+              echo "🔑 AMARAN: Masalah Token/Permission (Status $STATUS)"
             else
-              echo "⚠️ AMARAN: Bot bermasalah atau masih tidur (Status $STATUS)"
+              echo "❌ ERROR: Bot mungkin pengsan (Status $STATUS)"
             fi
           done
           echo "------------------------------------------"
-          echo "Semua bot telah diproses!"
+          echo "✨ Proses Jam Loceng selesai!"
