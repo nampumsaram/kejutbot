@@ -15,11 +15,11 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           BOTS=(
-            "https://pikeuli-weather-bot.hf.space"
+            
             "https://pikeuli-berita-bot.hf.space"
-            "https://pikeuli-waktu-solat.hf.space"
-            "https://pikeuli-bulan-purnama.hf.space"
-          )
+            
+            
+         )
 
           for URL in "${BOTS[@]}"; do
             echo "------------------------------------------"
